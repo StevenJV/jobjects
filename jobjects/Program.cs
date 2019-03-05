@@ -98,14 +98,9 @@ namespace jobjects
 
             var a = from p in dashObj["data"]["caseSections"][foundSection]["customFieldItems"]
                     select (string)p["insightsFieldName"];
-            var insightsFieldNameFound = false;
-            foreach (var b in a)
-            {
-                if (b.Contains(_testInsightsFieldName))
-                    insightsFieldNameFound = true;
-            }
+            var s = a.SingleOrDefault(x => x.Contains(_testInsightsFieldName));
             //Assert.True(insightsFieldNameFound, $"{_testInsightsFieldName} not found");
-            if (insightsFieldNameFound) Console.WriteLine($"{_testInsightsFieldName}  found");// Assert.isTrue(insightsFieldNameFound);
+            if (String.Equals(s, _testInsightsFieldName)) Console.WriteLine($"{_testInsightsFieldName}  found");
 
             Console.WriteLine("---");
             Console.ReadKey();
