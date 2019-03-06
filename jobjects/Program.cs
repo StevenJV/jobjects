@@ -74,43 +74,27 @@ namespace jobjects
 
             var dashObj = JObject.Parse(_getResponseText);
 
-            List<string> sectionNames = getListOfCaseSections(dashObj);
-            Console.WriteLine($"there were {sectionNames.Count} sections found.");
+            Array sectionNames = GetArrayOfCaseSections(dashObj);
+            Console.WriteLine($"there were {sectionNames.Length} sections found.");
 
-
-            // it feels like there should be a better way to do this
-            var intTestSectionFound = false;
-            int foundSection = 0;
-            var i = 0;
-            foreach (var name in sectionNames)
-            {
-                i++;
-                if (string.Equals(name, _testSectionName))
-                {
-                    intTestSectionFound = true;
-                    foundSection = i - 1;
-                }
-            }
-
-
-
-            if (intTestSectionFound) Console.WriteLine($"section `{_testSectionName}` found, in caseSection [{foundSection}]"); //Assert.True(intTestSectionFound, $"{_testSectionName} section not found");
+            int foundSection = Array.IndexOf(sectionNames, _testSectionName);
+            if (foundSection >= 0) Console.WriteLine($"section `{_testSectionName}` found, in caseSection [{foundSection}]"); //Assert.True(intTestSectionFound, $"{_testSectionName} section not found");
 
             var itemsInSection = from p in dashObj["data"]["caseSections"][foundSection]["customFieldItems"]
                     select (string)p["insightsFieldName"];
-            var chosenItem = itemsInSection.SingleOrDefault(x => x.Contains(_testInsightsFieldName));
+            var chosenItem = itemsInSection.SingleOrDefault(iis => iis.Contains(_testInsightsFieldName));
 
             if (String.Equals(chosenItem, _testInsightsFieldName)) Console.WriteLine($"insightsFieldName `{_testInsightsFieldName}` found"); //Assert.True(insightsFieldNameFound, $"{_testInsightsFieldName} not found");
 
             Console.ReadKey();
         }
 
-        private static List<string> getListOfCaseSections(JObject dashObj)
+        private static Array GetArrayOfCaseSections(JObject dashObj)
         {
             var tmp =
                 from p in dashObj["data"]["caseSections"]
                 select (string)p["name"];
-            List<string> sectionNames = tmp.ToList();
+            Array sectionNames = tmp.ToArray();
             return sectionNames;
         }
     }
