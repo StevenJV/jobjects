@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json.Linq;
 
@@ -71,39 +72,46 @@ namespace jobjects
             string _testSectionName = "Location";
             string _testInsightsFieldName = "InsightsFieldName999";
 
-            Console.WriteLine("Hello World!");
-            Console.WriteLine("---");
-
-
             var dashObj = JObject.Parse(_getResponseText);
 
-            var sectionNames =
-                from p in dashObj["data"]["caseSections"]
-                select (string)p["name"];
+            List<string> sectionNames = getListOfCaseSections(dashObj);
+            Console.WriteLine($"there were {sectionNames.Count} sections found.");
+
+
+            // it feels like there should be a better way to do this
             var intTestSectionFound = false;
-            int numberOfSections = 0;
             int foundSection = 0;
-            foreach (var item in sectionNames)
+            var i = 0;
+            foreach (var name in sectionNames)
             {
-                numberOfSections++;
-                if (string.Equals(item, _testSectionName))
+                i++;
+                if (string.Equals(name, _testSectionName))
                 {
                     intTestSectionFound = true;
-                    foundSection = numberOfSections - 1;
+                    foundSection = i - 1;
                 }
             }
-            if (intTestSectionFound) Console.WriteLine($"{_testSectionName}  found");//Assert.True(intTestSectionFound, $"{_testSectionName} section not found");
 
-            Console.WriteLine("---");
 
-            var a = from p in dashObj["data"]["caseSections"][foundSection]["customFieldItems"]
+
+            if (intTestSectionFound) Console.WriteLine($"section `{_testSectionName}` found, in caseSection [{foundSection}]"); //Assert.True(intTestSectionFound, $"{_testSectionName} section not found");
+
+            var itemsInSection = from p in dashObj["data"]["caseSections"][foundSection]["customFieldItems"]
                     select (string)p["insightsFieldName"];
-            var s = a.SingleOrDefault(x => x.Contains(_testInsightsFieldName));
-            //Assert.True(insightsFieldNameFound, $"{_testInsightsFieldName} not found");
-            if (String.Equals(s, _testInsightsFieldName)) Console.WriteLine($"{_testInsightsFieldName}  found");
+            var chosenItem = itemsInSection.SingleOrDefault(x => x.Contains(_testInsightsFieldName));
 
-            Console.WriteLine("---");
+            if (String.Equals(chosenItem, _testInsightsFieldName)) Console.WriteLine($"insightsFieldName `{_testInsightsFieldName}` found"); //Assert.True(insightsFieldNameFound, $"{_testInsightsFieldName} not found");
+
             Console.ReadKey();
+        }
+
+        private static List<string> getListOfCaseSections(JObject dashObj)
+        {
+            var tmp =
+                from p in dashObj["data"]["caseSections"]
+                select (string)p["name"];
+            List<string> sectionNames = tmp.ToList();
+            return sectionNames;
         }
     }
 }
