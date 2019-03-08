@@ -1,5 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using Newtonsoft.Json.Linq;
 
 namespace swapi
 {
@@ -10,9 +14,9 @@ namespace swapi
         private static void Main(string[] args)
         {
             Console.WriteLine("Hello Galaxy!");
-            string planets = GetPlanet(1);
-            Console.WriteLine(planets);
-
+            var planetData = JObject.Parse(GetPlanet());
+            var planetNames = from p in planetData["results"] select (string) p["name"]; // ok for GetPlanet(), but not for GetPlanet(1)
+            foreach(string name in planetNames) Console.WriteLine(name);
             Console.ReadKey();
         }
 
@@ -21,6 +25,8 @@ namespace swapi
         {
             using (var httpClient = new HttpClient())
             {
+                httpClient.DefaultRequestHeaders.Accept.Clear();
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 string fullUrl = _url + "planets/" + planetId;
                 var response = httpClient.GetStringAsync(new Uri(fullUrl)).Result;
                 return response;
@@ -30,6 +36,7 @@ namespace swapi
         {
             using (var httpClient = new HttpClient())
             {
+                httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 string fullUrl = _url + "planets/";
                 var response = httpClient.GetStringAsync(new Uri(fullUrl)).Result;
                 return response;
