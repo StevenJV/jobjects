@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.28010.2048
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "caseSections", "jobjects\caseSections.csproj", "{B1866C75-3AF8-46B9-BDC1-93B5439785A4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "swapi", "swapi\swapi.csproj", "{EDE96BC4-5729-4E05-947A-C38B49F4CBCB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StarWarsAPI", "swapi\StarWarsAPI.csproj", "{EDE96BC4-5729-4E05-947A-C38B49F4CBCB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
