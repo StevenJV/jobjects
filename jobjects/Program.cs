@@ -80,8 +80,8 @@ namespace jobjects
             int foundSection = Array.IndexOf(sectionNames, _testSectionName);
             if (foundSection >= 0) Console.WriteLine($"section `{_testSectionName}` found, in caseSection [{foundSection}]"); //Assert.True(intTestSectionFound, $"{_testSectionName} section not found");
 
-            var itemsInSection = from p in dashObj["data"]["caseSections"][foundSection]["customFieldItems"]
-                    select (string)p["insightsFieldName"];
+            var itemsInSection = dashObj["data"]["caseSections"][foundSection]["customFieldItems"]
+                .Values<string>("insightsFieldName");
             var chosenItem = itemsInSection.SingleOrDefault(iis => iis.Contains(_testInsightsFieldName));
 
             if (String.Equals(chosenItem, _testInsightsFieldName)) Console.WriteLine($"insightsFieldName `{_testInsightsFieldName}` found"); //Assert.True(insightsFieldNameFound, $"{_testInsightsFieldName} not found");
@@ -91,9 +91,7 @@ namespace jobjects
 
         private static Array GetArrayOfCaseSections(JObject dashObj)
         {
-            var tmp =
-                from p in dashObj["data"]["caseSections"]
-                select (string)p["name"];
+            var tmp = dashObj["data"]["caseSections"].Values<string>("name");
             Array sectionNames = tmp.ToArray();
             return sectionNames;
         }
