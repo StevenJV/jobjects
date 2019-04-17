@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace StarWarsAPI
@@ -11,30 +13,33 @@ namespace StarWarsAPI
     {
         private const string Url = "http://swapi.co/api/";
         private static readonly HttpClient HttpClient = new HttpClient();
+        private static List<string> _planetFilmNames = new List<string>();
+        private static List<string> _planetFilmUrLs = new List<string>();
 
         private static void Main(string[] args)
         {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var watch = Stopwatch.StartNew();
             var countofplanets = GetNumberOfPlanets();
-            Console.WriteLine($"Hello Galaxy! There are {countofplanets} planets in the Star Wars universe. These have been seen in the movies:");
+            Console.WriteLine(
+                $"Hello Galaxy! There are {countofplanets} planets in the Star Wars universe. These have been seen in the movies:");
             for (var planetNumber = 1;
                 planetNumber <= countofplanets;
                 planetNumber++)
             {
+                _planetFilmUrLs.Clear();
+                _planetFilmNames.Clear();
                 var planetInfo = JObject.Parse(GetPlanet(planetNumber));
                 var planetName = planetInfo.Value<string>("name");
                 var planetTerrain = planetInfo.Value<string>("terrain");
 
-                var planetFilms = planetInfo["films"].Values<string>().ToList();
-                if (!planetFilms.Any()) continue;
+                _planetFilmUrLs = planetInfo["films"].Values<string>().ToList();
+                if (!_planetFilmUrLs.Any()) continue;
                 Console.WriteLine($"{planetName} ({planetTerrain})");
                 Console.WriteLine(" seen in:");
-                foreach (var film in planetFilms)
+                _planetFilmNames = ListFilmsAsync(_planetFilmUrLs).Result;
+                foreach (var film in _planetFilmNames)
                 {
-                    var uriAddress1 = new Uri(film);
-                    if (!int.TryParse(uriAddress1.Segments[uriAddress1.Segments.Length - 1].TrimEnd('/'),
-                        out var filmNumber)) continue;
-                    var filmInfo = JObject.Parse(GetFilm(filmNumber));
+                    var filmInfo = JObject.Parse(film);
                     var filmName = filmInfo.Value<string>("title");
                     Console.WriteLine($"  {filmName}");
                 }
@@ -48,13 +53,39 @@ namespace StarWarsAPI
             Console.ReadKey();
         }
 
-        private static string GetFilm(int filmNumber)
+
+        private static async Task<List<string>> ListFilmsAsync(List<string> planetFilms) //because async here
+        {
+            var listOfFilmTitles = new List<string>();
+            foreach (var film in planetFilms)
+            {
+                var uriAddress1 = new Uri(film);
+                if (!int.TryParse(uriAddress1.Segments[uriAddress1.Segments.Length - 1].TrimEnd('/'),
+                    out var filmNumber)) continue;
+                listOfFilmTitles.Add(await GetFilmInfoAsync(filmNumber)); //and await without .result here
+            }
+
+            return listOfFilmTitles; //this returns a task containing the list, not just the list
+        }
+
+        private static async Task<string> GetFilmInfoAsync(int filmNumber)
         {
             HttpClient.DefaultRequestHeaders.Accept.Clear();
             HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var fullUrl = Url + "films/" + filmNumber;
-            var response = HttpClient.GetStringAsync(new Uri(fullUrl)).Result;
-            return response;
+            return await HttpClient.GetStringAsync(new Uri(fullUrl));
+        }
+
+        private static Task<string> GetFilm(int filmNumber)
+            // this will still work, and be somewhat faster above, but because 
+            // it's not "async all the way down," is not as fast 
+            // because this method is not being executed asynchronously(?)
+        {
+            HttpClient.DefaultRequestHeaders.Accept.Clear();
+            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var fullUrl = Url + "films/" + filmNumber;
+            var result = HttpClient.GetStringAsync(new Uri(fullUrl));
+            return result;
         }
 
         public static string GetPlanet(int planetId)
