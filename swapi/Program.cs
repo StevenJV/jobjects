@@ -14,6 +14,7 @@ namespace StarWarsAPI
 
         private static void Main(string[] args)
         {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
             var countofplanets = GetNumberOfPlanets();
             Console.WriteLine($"Hello Galaxy! There are {countofplanets} planets in the Star Wars universe. These have been seen in the movies:");
             for (var planetNumber = 1;
@@ -42,6 +43,8 @@ namespace StarWarsAPI
             }
 
             Console.WriteLine("No Bothans died to bring us this information.");
+            watch.Stop();
+            Console.WriteLine($"Total execution time (jObject): {watch.ElapsedMilliseconds}");
             Console.ReadKey();
         }
 
