@@ -76,18 +76,6 @@ namespace StarWarsAPI
             return await HttpClient.GetStringAsync(new Uri(fullUrl));
         }
 
-        private static Task<string> GetFilm(int filmNumber)
-            // this will still work, and be somewhat faster above, but because 
-            // it's not "async all the way down," is not as fast 
-            // because this method is not being executed asynchronously(?)
-        {
-            HttpClient.DefaultRequestHeaders.Accept.Clear();
-            HttpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var fullUrl = Url + "films/" + filmNumber;
-            var result = HttpClient.GetStringAsync(new Uri(fullUrl));
-            return result;
-        }
-
         public static string GetPlanet(int planetId)
         {
             HttpClient.DefaultRequestHeaders.Accept.Clear();
